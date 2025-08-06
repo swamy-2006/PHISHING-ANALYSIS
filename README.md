@@ -67,7 +67,8 @@ What this means: Since the email passed SPF and DKIM, it automatically passed DM
 
 In some phishing emails the urls will be masked 
 like this:
-![img alt]()
+![img alt](https://github.com/swamy-2006/PHISHING-ANALYSIS/blob/4af69c8144852c66282daf27edd877bcce1a5024/WhatsApp%20Image%202025-08-06%20at%2021.11.57_02686d50.jpg)
+![img alt](https://github.com/swamy-2006/PHISHING-ANALYSIS/blob/4af69c8144852c66282daf27edd877bcce1a5024/WhatsApp%20Image%202025-08-06%20at%2021.14.19_09b64107.jpg)
 
 
 
