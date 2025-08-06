@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Phishing Email Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application uses a two-column interactive layout. The left column displays a static representation of the phishing email, with key phrases wrapped in spans for highlighting. The right column contains the analysis controls and display area. Users click on a specific phishing indicator (e.g., "Spoofed Sender") from a list. This action triggers JavaScript to highlight the corresponding text in the email on the left and simultaneously displays a detailed explanation for that indicator on the right. This side-by-side, interactive "evidence and analysis" structure was chosen because it creates a direct, cause-and-effect learning experience, making it easier for users to connect abstract concepts to concrete examples within the email. A summary chart provides a high-level overview of the tactics used. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Sample phishing email content. Goal: Present evidence. Method: Styled HTML block. Interaction: JS-driven highlighting of specific text spans. Justification: Allows for targeted, interactive dissection of the source material.
+        - Report Info: List of phishing indicators (e.g., spoofing, urgency). Goal: Main navigation for the analysis. Method: Clickable buttons. Interaction: Triggers UI updates. Justification: Provides clear, intuitive control over the displayed information.
+        - Report Info: Detailed explanations for each indicator. Goal: Educate the user. Method: Dynamic text block. Interaction: Content is updated based on user's selection. Justification: Keeps the interface clean and focused on one concept at a time.
+        - Report Info: Categories of phishing tactics. Goal: High-level summary. Viz: Chart.js Donut Chart. Interaction: Static visual aid. Justification: Offers a quick, memorable overview of the different types of deception used in the email. Library: Chart.js (Canvas).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .highlight { background-color: #fef9c3; color: #713f12; border-radius: 4px; padding: 2px 4px; transition: all 0.3s ease-in-out; }
+        .analysis-button { transition: all 0.3s ease-in-out; }
+        .analysis-button.active { background-color: #1e40af; color: white; }
+        .chart-container { position: relative; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">The Anatomy of a Phishing Email</h1>
+            <p class="mt-2 text-lg text-gray-600">An interactive guide to identifying common phishing tactics.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+            <!-- Left Column: The Email -->
+            <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <div class="border-b pb-4 mb-4">
+                    <p class="text-sm text-gray-500">From: <span id="highlight-sender" class="font-medium text-gray-700">MicroSoft Security &lt;secure.alert@microsft-security-center.com&gt;</span></p>
+                    <p class="text-sm text-gray-500">To: <span class="font-medium text-gray-700">Valued Customer &lt;you@youremail.com&gt;</span></p>
+                    <p class="text-sm text-gray-500">Subject: <span id="highlight-subject" class="font-bold text-gray-800">URGENT ACTION: Unusal Sign-in Detected on Your Acount</span></p>
+                </div>
+                <div class="text-gray-700 space-y-4">
+                    <p><span id="highlight-greeting">Dear Valued Customer,</span></p>
+                    <p>We have detected <span id="highlight-typo-1">unusal</span> sign-in activity on your MicroSoft <span id="highlight-typo-2">acount</span> from a location we do not recognize. For your protection, we have <span id="highlight-typo-3">temporarilly</span> blocked access.</p>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm">
+                        <p class="font-semibold">Details of the activity:</p>
+                        <ul class="list-disc list-inside ml-2 mt-2">
+                            <li><strong>IP Address:</strong> 103.86.98.101 (Hanoi, Vietnam)</li>
+                            <li><strong>Time:</strong> August 07, 2025, 03:15 AM (GMT)</li>
+                        </ul>
+                    </div>
+                    <p id="highlight-urgency">To restore your <span id="highlight-typo-4">acount</span> access, you must verify your identity <span id="highlight-typo-5">imediatly</span>. Failure to do so within 12 hours will result in permanent suspension of your <span id="highlight-typo-6">acount</span> to prevent further fraud.</p>
+                    <p>Please click the link below to verify your information and secure your <span id="highlight-typo-7">acount</span>.</p>
+                    <div class="mt-6 text-center">
+                        <a id="highlight-link" href="#" onclick="event.preventDefault();" class="inline-block bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                            Click Here to Verify Your Account
+                        </a>
+                        <p class="text-xs text-gray-500 mt-2">Hover shows: http://192.168.1.1-update.security-check.biz/...</p>
+                    </div>
+                    <p class="mt-8">
+                        <span id="highlight-typo-8">Sincerly</span>,<br>
+                        The MicroSoft Security Team
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Column: The Analysis -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4">Analysis Toolkit</h2>
+                    <p class="text-gray-600 mb-4">Click on an indicator below to see it highlighted in the email and learn why it's a red flag.</p>
+                    <div id="analysis-controls" class="flex flex-wrap gap-2">
+                    </div>
+                </div>
+
+                <div id="analysis-display" class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 min-h-[200px]">
+                    <h3 id="analysis-title" class="text-lg font-bold text-blue-800"></h3>
+                    <p id="analysis-text" class="mt-2 text-gray-700"></p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <h2 class="text-xl font-bold mb-4 text-center">Tactic Categories</h2>
+                     <div class="chart-container">
+                        <canvas id="phishingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const analysisData = {
+            sender: {
+                title: "Spoofed & Suspicious Sender",
+                text: "The sender's domain is misspelled as 'microsft-security-center.com' instead of 'microsoft.com'. This is a classic deception tactic to trick users who might not notice the subtle error. Legitimate companies always use their official, correctly spelled domain.",
+                highlights: ['highlight-sender']
+            },
+            urgency: {
+                title: "Urgent & Threatening Language",
+                text: "Phrases like 'URGENT ACTION', 'imediatly', and the threat of 'permanent suspension' create panic. Attackers use this social engineering tactic to rush you into acting without thinking, hoping you'll ignore other red flags.",
+                highlights: ['highlight-subject', 'highlight-urgency']
+            },
+            typos: {
+                title: "Spelling & Grammar Errors",
+                text: "The email is filled with mistakes: 'unusal', 'acount', 'temporarilly', 'imediatly', 'sincerly'. Professional companies have teams to ensure their communications are error-free. These mistakes are a major sign of an unprofessional, fraudulent source.",
+                highlights: ['highlight-typo-1', 'highlight-typo-2', 'highlight-typo-3', 'highlight-typo-4', 'highlight-typo-5', 'highlight-typo-6', 'highlight-typo-7', 'highlight-typo-8', 'highlight-subject']
+            },
+            greeting: {
+                title: "Generic Greeting",
+                text: "The email uses 'Dear Valued Customer'. If a company you have an account with emails you, they will almost always use your actual name. A generic greeting suggests this is a mass email sent to thousands of potential victims.",
+                highlights: ['highlight-greeting']
+            },
+            link: {
+                title: "Mismatched & Suspicious URL",
+                text: "Although the link text looks official, hovering over it reveals a highly suspicious URL: 'security-check.biz'. It doesn't point to a Microsoft domain, uses an untrustworthy '.biz' top-level domain, and starts with an insecure IP-like address. This is the payload of the attack.",
+                highlights: ['highlight-link']
+            }
+        };
+
+        const controlsContainer = document.getElementById('analysis-controls');
+        const titleEl = document.getElementById('analysis-title');
+        const textEl = document.getElementById('analysis-text');
+        const allHighlightableSpans = document.querySelectorAll('[id^="highlight-"]');
+
+        function updateAnalysis(key) {
+            const data = analysisData[key];
+            
+            titleEl.textContent = data.title;
+            textEl.textContent = data.text;
+
+            allHighlightableSpans.forEach(span => span.classList.remove('highlight'));
+            data.highlights.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('highlight');
+            });
+            
+            document.querySelectorAll('.analysis-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.analysis-button[data-key="${key}"]`).classList.add('active');
+        }
+
+        Object.keys(analysisData).forEach(key => {
+            const data = analysisData[key];
+            const button = document.createElement('button');
+            button.className = 'analysis-button bg-blue-100 text-blue-800 text-sm font-medium px-4 py-2 rounded-full hover:bg-blue-200';
+            button.textContent = data.title;
+            button.dataset.key = key;
+            button.onclick = () => updateAnalysis(key);
+            controlsContainer.appendChild(button);
+        });
+        
+        window.onload = function() {
+            updateAnalysis('sender');
+
+            const ctx = document.getElementById('phishingChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'Technical Spoofing',
+                        'Social Engineering',
+                        'Poor Quality Control'
+                    ],
+                    datasets: [{
+                        label: 'Phishing Tactics',
+                        data: [2, 2, 1],
+                        backgroundColor: [
+                            'rgb(37, 99, 235)',
+                            'rgb(219, 39, 119)',
+                            'rgb(234, 179, 8)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.raw + ' indicators';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+</html>
