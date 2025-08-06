@@ -20,7 +20,7 @@ This repository contains a project focused on analyzing a sample phishing email 
 
 ● Web Browser: To inspect hyperlink destinations without clicking(In the PC or laptop by moving cursor on the link we can check the masked url.)
 
-
+![img alt](https://github.com/swamy-2006/PHISHING-ANALYSIS/blob/80536aa34b01130465bf89531072de64c6872d70/WhatsApp%20Image%202025-08-06%20at%2008.06.56_829b5809.jpg)
 
 
 
@@ -31,6 +31,13 @@ From the IP address we can get the location of the service which they have sent 
 
 From there we can confirm the location of genrated email.
 Also from the domain name we can do dnslookup.
+
+
+
+In some phishing emails the urls will be masked 
+like this:
+![img alt]()
+
 In the PC or laptop by moving cursor on the link we can check the masked url.
 We can paste the link which is copied from the email which is appearing to be legit but not in the website or a tool called [VIRUS TOTAL](https://virustotal.com)
 
